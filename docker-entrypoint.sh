@@ -10,8 +10,8 @@ fi
 if [ ! -d '/usr/share/nltk_data/' ]; then
     (echo "import nltk" ; echo "nltk.download('punkt')") | python3
     (echo "import nltk" ; echo "nltk.download('wordnet')") | python3
-#    (echo "import nltk" ; echo "nltk.download('averaged_perceptron_tagger')") | python3
-#    (echo "import nltk" ; echo "nltk.download('universal_tagset')") | python3
+    (echo "import nltk" ; echo "nltk.download('averaged_perceptron_tagger')") | python3
+    (echo "import nltk" ; echo "nltk.download('universal_tagset')") | python3
     mv nltk_data/ /usr/share/nltk_data/
 fi
 flask db upgrade
