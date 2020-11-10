@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Route, Switch } from 'react-router-dom'
 import { withRouter } from 'react-router';
 import auth0Client from './Auth';
+import ProtectedRoute from './components/ProtectedRoute';
 import Auth0Callback from './components/Auth0Callback';
 import HomePage from './components/HomePage';
 import Chat from './components/Chat';
@@ -45,31 +46,25 @@ class App extends Component {
     return (
         <div className="App">
             <PushListeners />
+            { !this.state.checkingSession &&
             <Layout style={{ background:'#fff', height:'100vh' }}>
                 <LeftMenu/>
                 <RightFloatingChat/>
                 <BottomDrawerTextExpander/>
                 <Content>
                     <Switch>
-                      { !this.state.checkingSession && <Route exact path='/' component={HomePage} /> }
-                      { !auth0Client.isAuthenticated() &&
+                        <Route exact path='/' component={HomePage} />
+                        { !auth0Client.isAuthenticated() &&
                         <Route exact path='/callback' component={Auth0Callback} />
-                      }
-                      { !this.state.checkingSession && auth0Client.isAuthenticated() &&
-                        <Route path="/classifiers" render={(props) => (<AgentsList {...props} type={1} />)} />
-                      }
-                      { !this.state.checkingSession && auth0Client.isAuthenticated() &&
-                        <Route path="/chatbots" render={(props) => (<AgentsList {...props} type={2} />)} />
-                      }
-                      { !this.state.checkingSession && auth0Client.isAuthenticated() &&
-                        <Route path="/module/:uuid" component={ModuleBuilder}/>
-                      }
-                      { !this.state.checkingSession &&
+                        }
+                        <ProtectedRoute path="/classifiers" component={AgentsList} type={1} />
+                        <ProtectedRoute path="/chatbots" component={AgentsList} type={2} />
+                        <ProtectedRoute path="/module/:uuid" component={ModuleBuilder}/>
                         <Route path="/chat/:identifier" component={Chat}/>
-                      }
                     </Switch>
                 </Content>
             </Layout>
+            }
         </div>
     );
   }

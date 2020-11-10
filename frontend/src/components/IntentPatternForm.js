@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useStore } from '../Hooks';
 import { saveIntentPattern, deleteIntentPattern } from '../actions/modules';
+import TextExpander from './TextExpander';
 import IntentPatternVariationForm from './IntentPatternVariationForm';
 import { Space, Button, Popconfirm } from 'antd';
 import { SaveFilled, PlusOutlined, DeleteFilled, LoadingOutlined, CloseOutlined, NodeExpandOutlined, DownloadOutlined } from '@ant-design/icons';
@@ -30,13 +31,21 @@ export default function IntentPatternForm(props){
         setViewExpandable(false);
     }
 
-    const save = (event) => {
+    const onSubmit = (event) => {
+        event.preventDefault();
+        if(!modified){
+            return;
+        }
+        save()
+    }
+
+    const save = (data=false) => {
         const callbacks = {
             error: () => {;
                 setButtonsDisabled(false);
                 setSaving(false);
             },
-            final: !uuid
+            final: (!uuid || data != false)
                 ? reset
                 : () => {
                     setButtonsDisabled(false);
@@ -45,17 +54,15 @@ export default function IntentPatternForm(props){
                 }
         };
 
-        event.preventDefault();
-        if(!modified){
-            return;
-        }
         setButtonsDisabled(true);
         setSaving(true);
-        if(uuid){
-            dispatch(saveIntentPattern({uuid: uuid, text: text}, callbacks));
-        }else{
-            dispatch(saveIntentPattern({intent_uuid: intent_uuid, text: text}, callbacks));
+        if (data == false){
+            data = (uuid)
+                ? {uuid: uuid, text: text}
+                : {intent_uuid: intent_uuid, text: text};
         }
+        console.log(data)
+        dispatch(saveIntentPattern(data, callbacks));
     }
 
     const dele = () => {
@@ -75,7 +82,7 @@ export default function IntentPatternForm(props){
     return (
             <div className="component terraced">
             { !viewExpandable ?
-                <form className="grid no-margin-padding-border" onSubmit={save}>
+                <form className="grid no-margin-padding-border" onSubmit={onSubmit}>
                     <div className="component">
                         <Space size="small">
                             <DownloadOutlined rotate="180"/>
@@ -112,7 +119,7 @@ export default function IntentPatternForm(props){
                     </div>
                 </form>
             :
-                <IntentPatternVariationForm uuid={uuid} intent_uuid={intent_uuid} reset={reset} />
+                <TextExpander text={text} data={{intent_uuid:intent_uuid}} save={save} reset={reset} />
             }
             </div>
     );
